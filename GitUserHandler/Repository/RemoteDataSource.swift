@@ -2,7 +2,7 @@
 //  RemoteDataRepository.swift
 //  GitUserHandler
 //
-//  Created by Akshay Patil on 13/03/21.
+//  Created by Supriya Karanje on 13/03/21.
 //
 
 import Foundation
@@ -12,27 +12,17 @@ class RemoteDataSource {
         let githubUserURL = URL(string: "https://api.github.com/users?since=\(since)")!
         
         let githubUserListResource = Resource<Array<GitHubUser>>(url: githubUserURL) { data in
-            var gitHubUser : Array<GitHubUser>?
-            let decoder = JSONDecoder()
-            let managedObjectContext = CoreDataStorage.shared.managedObjectContext()
-            guard let codingUserInfoKeyManagedObjectContext = CodingUserInfoKey.managedObjectContext else {
-                fatalError("Failed to retrieve managed object context Key")
-            }
-            decoder.userInfo[codingUserInfoKeyManagedObjectContext] = managedObjectContext
-            do {
-                let result = try decoder.decode([GitHubUser].self, from: data)
-                gitHubUser = result
-                print(result)
-            } catch let error {
-                print("decoding error: \(error)")
-            }
-            return gitHubUser!
+            return LocalDataSource().createGitHubUserList(data)
         }
         DispatchQueue(label: "userapi.serial.queue").async {
             Webservice().load(resource: githubUserListResource) { result in
                 if let gitHubUser = result {
                     DispatchQueue.main.async {
                         success(gitHubUser)
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        error()
                     }
                 }
             }
@@ -43,30 +33,17 @@ class RemoteDataSource {
         let githubUserURL = URL(string: "https://api.github.com/users/\(userName)")!
         
         let githubUserListResource = Resource<GitHubUser>(url: githubUserURL) { data in
-            var gitHubUser : GitHubUser?
-            let decoder = JSONDecoder()
-            let managedObjectContext = CoreDataStorage.shared.managedObjectContext()
-            guard let codingUserInfoKeyManagedObjectContext = CodingUserInfoKey.managedObjectContext else {
-                fatalError("Failed to retrieve managed object context Key")
-            }
-            decoder.userInfo[codingUserInfoKeyManagedObjectContext] = managedObjectContext
-            do {
-                let result = try decoder.decode(GitHubUser.self, from: data)
-                gitHubUser = result
-                print(result)
-            } catch let error {
-                print("decoding error: \(error)")
-            }
-//            let paths = NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.documentDirectory, FileManager.SearchPathDomainMask.userDomainMask, true)
-//            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-//            print(paths[0])
-            return gitHubUser!
+            return LocalDataSource().createGitHubUser(data)
         }
         DispatchQueue(label: "userapi.serial.queue").async {
             Webservice().load(resource: githubUserListResource) { result in
                 if let gitHubUser = result {
                     DispatchQueue.main.async {
                         success(gitHubUser)
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        error()
                     }
                 }
             }

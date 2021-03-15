@@ -2,7 +2,7 @@
 //  ViewController.swift
 //  GitUserHandler
 //
-//  Created by Akshay Patil on 13/03/21.
+//  Created by Supriya Karanje on 13/03/21.
 //
 
 import UIKit

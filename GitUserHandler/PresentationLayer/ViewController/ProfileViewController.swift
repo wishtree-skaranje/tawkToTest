@@ -2,7 +2,7 @@
 //  ProfileViewController.swift
 //  GitUserHandler
 //
-//  Created by Akshay Patil on 14/03/21.
+//  Created by Supriya Karanje on 14/03/21.
 //
 
 import Foundation
@@ -20,19 +20,16 @@ class ProfileViewController: UITableViewController {
     
     private var gitHubViewModel : GitHubUserViewModel?
     var inputId : Int32?
-
+    
+    private var alert: UIAlertController?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         gitHubViewModel = GitHubUserViewModel(inputId)
         noteTextView?.layer.borderColor = UIColor.lightGray.cgColor
         
         imageView?.startShimmeringEffect()
-        followersLabel?.startShimmeringEffect()
-        followingLabel?.startShimmeringEffect()
-        companyLabel?.startShimmeringEffect()
-        nameLabel?.startShimmeringEffect()
-        blogLabel?.startShimmeringEffect()
-        noteTextView?.startShimmeringEffect()
+        startUIShimmerAnimation()
         
         gitHubViewModel?.setGitHubUserViewModelDelegate(self)
         gitHubViewModel?.load()
@@ -46,21 +43,43 @@ class ProfileViewController: UITableViewController {
         }
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.gitHubViewModel?.cleanup()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.gitHubViewModel?.setup()
+    }
+    
     @IBAction func saveClicked(_ sender: Any) {
         gitHubViewModel?.saveNote(note: noteTextView.text)
     }
     
-}
-
-
-extension ProfileViewController : GitHubUserViewModelProtocol {
-    func userFound() {
+    private func startUIShimmerAnimation() {
+        followersLabel?.startShimmeringEffect()
+        followingLabel?.startShimmeringEffect()
+        companyLabel?.startShimmeringEffect()
+        nameLabel?.startShimmeringEffect()
+        blogLabel?.startShimmeringEffect()
+        noteTextView?.startShimmeringEffect()
+    }
+    
+    private func stopUIShimmerAnimation() {
         followersLabel?.stopShimmeringEffect()
         followingLabel?.stopShimmeringEffect()
         companyLabel?.stopShimmeringEffect()
         nameLabel?.stopShimmeringEffect()
         blogLabel?.stopShimmeringEffect()
         noteTextView?.stopShimmeringEffect()
+    }
+    
+}
+
+extension ProfileViewController : GitHubUserViewModelProtocol {
+    func userFound() {
+        stopUIShimmerAnimation()
         
         followersLabel.text = "Followers: \(gitHubViewModel?.gitHubUser.followers ?? 0)"
         followingLabel.text = "Following: \(gitHubViewModel?.gitHubUser.following ?? 0)"
@@ -84,5 +103,39 @@ extension ProfileViewController : GitHubUserViewModelProtocol {
         }, completion: {(isCompleted) in
             toastLabel.removeFromSuperview()
         })
+    }
+    
+    func showNoInternetConenctionUI() {
+        let toastLabel = UILabel(frame: CGRect(x: self.view.frame.size.width/2 - 125, y: self.view.frame.size.height-(self.view.frame.size.height/5), width: 250, height: 35))
+        toastLabel.backgroundColor = UIColor.darkGray
+        toastLabel.textAlignment = .center;
+        toastLabel.text = "No internet"
+        toastLabel.alpha = 1.0
+        toastLabel.tag = 98
+        toastLabel.layer.cornerRadius = 10;
+        toastLabel.clipsToBounds  =  true
+        self.view.addSubview(toastLabel)
+    }
+    
+    func hideNoInternetConenction() {
+        UIView.animate(withDuration: 1.0, delay: 0.50, options: .curveEaseOut, animations: {
+            self.view.viewWithTag(98)?.alpha = 0.0
+        }, completion: {(isCompleted) in
+            self.view.viewWithTag(98)?.removeFromSuperview()
+        })
+    }
+    
+    func showErrorUIPopover(errorText: String) {
+        alert = UIAlertController(title: "", message: errorText, preferredStyle: UIAlertController.Style.alert)
+        alert?.addAction(UIAlertAction(title: "Reload", style: UIAlertAction.Style.default, handler: { (action) in
+            self.gitHubViewModel?.reloadAfterError()
+        }))
+        alert?.addAction(UIAlertAction(title: "Dismiss", style: UIAlertAction.Style.default, handler: nil))
+        self.present(alert!, animated: true, completion: nil)
+    }
+    
+    func userLoadingInitaited() {
+        alert?.dismiss(animated: true, completion: nil)
+        hideNoInternetConenction()
     }
 }

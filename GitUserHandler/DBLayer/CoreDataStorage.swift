@@ -2,7 +2,7 @@
 //  CoreDataStorage.swift
 //  GitUserHandler
 //
-//  Created by Akshay Patil on 13/03/21.
+//  Created by Supriya Karanje on 13/03/21.
 //
 
 import Foundation
@@ -34,14 +34,12 @@ class CoreDataStorage: NSObject {
     func saveContext () {
 //        persistentContainer.performBackgroundTask { (context) in
         let context = persistentContainer.viewContext
-        context.perform {
-                if context.hasChanges {
-                do {
-                    try context.save()
-                } catch {
-                    let nserror = error as NSError
-                    fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-                }
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch {
+                let nserror = error as NSError
+                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
             }
         }
     }

@@ -2,6 +2,7 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="1Kk-S9-kpp">
     <device id="retina6_5" orientation="portrait" appearance="light"/>
     <dependencies>
+        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -142,7 +143,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Company" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KU4-Be-d3Q">
-                                                    <rect key="frame" x="0.0" y="57" width="82.666666666666671" height="17"/>
+                                                    <rect key="frame" x="0.0" y="57.000000000000007" width="82.666666666666671" height="18.333333333333336"/>
                                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
@@ -179,6 +180,7 @@
                                                 <constraint firstItem="fGA-8E-ded" firstAttribute="top" secondItem="KU4-Be-d3Q" secondAttribute="top" constant="-2" id="acF-TT-2UE"/>
                                                 <constraint firstAttribute="trailing" secondItem="PFo-Wr-Hbt" secondAttribute="trailing" constant="20" id="bSs-yd-NgO"/>
                                                 <constraint firstAttribute="trailing" secondItem="fGA-8E-ded" secondAttribute="trailing" constant="20" id="dyH-XO-xgW"/>
+                                                <constraint firstItem="OjT-7H-YR8" firstAttribute="top" secondItem="KU4-Be-d3Q" secondAttribute="bottom" priority="750" constant="15" id="ffA-Fh-tWF"/>
                                                 <constraint firstItem="3qO-kI-MAV" firstAttribute="leading" secondItem="qJh-cn-8e4" secondAttribute="trailing" constant="10" id="lYt-Cb-i31"/>
                                                 <constraint firstItem="KU4-Be-d3Q" firstAttribute="leading" secondItem="brK-f6-lk0" secondAttribute="leading" id="lh3-B0-Nom"/>
                                                 <constraint firstItem="OjT-7H-YR8" firstAttribute="leading" secondItem="brK-f6-lk0" secondAttribute="leading" id="n47-f9-JnJ"/>

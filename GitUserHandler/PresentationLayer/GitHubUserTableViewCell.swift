@@ -2,7 +2,7 @@
 //  GitHubUserTableViewCell.swift
 //  GitUserHandler
 //
-//  Created by Akshay Patil on 13/03/21.
+//  Created by Supriya Karanje on 13/03/21.
 //
 
 import UIKit
@@ -88,8 +88,9 @@ class NormalGitHubUserTableViewCell: GitHubUserTableViewCell<NoramlGitHubUserVie
 class NoteGitHubUserTableViewCell: GitHubUserTableViewCell<NoteGitHubUserViewModel> {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        let image = UIImageView(frame: CGRect(x: 0, y: 0, width: 15, height: 20))
-        image.image = UIImage(systemName: "note.text")
+        let image = UIImageView(frame: CGRect(x: 0, y: 0, width: 15, height: 18))
+        image.image = UIImage(named: "ic_note")?.withRenderingMode(.alwaysTemplate)
+        image.tintColor = UIColor.systemBlue
         self.accessoryView = image
     }
     

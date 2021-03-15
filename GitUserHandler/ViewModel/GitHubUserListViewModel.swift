@@ -2,21 +2,24 @@
 //  GitHubUserListViewModel.swift
 //  GitUserHandler
 //
-//  Created by Akshay Patil on 13/03/21.
+//  Created by Supriya Karanje on 13/03/21.
 //
 
 import Foundation
 
 protocol GitHubUserListViewModelProtocol {
     func listLoaded()
+    func loadingInitaited()
     func showErrorUI(errorText: String, imageName: String)
     func hideErrorUI()
+    func showErrorUIPopover(errorText: String)
 }
 
 class GitHubUserListViewModel{
     private var gitHubUserList : Array<GitHubUserViewModel>?
     private var gitHubUserVMDelegate: GitHubUserListViewModelProtocol?
     private var searchText : String = ""
+    private var exponentialBackoffTime = 5
     public var isSearchActive: Bool {
         get {
             return !searchText.isEmpty
@@ -50,6 +53,19 @@ class GitHubUserListViewModel{
         fatalError("No GitHubUserViewModel found at index \(index)")
     }
     
+    func notifyAPIError() {
+        gitHubUserVMDelegate?.showErrorUIPopover(errorText: "Loading failed, reloading will starts in \(exponentialBackoffTime) seconds")
+        let dispatchAfter = DispatchTimeInterval.seconds(exponentialBackoffTime)
+        isLoading = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + dispatchAfter) {
+            self.exponentialBackoffTime = self.exponentialBackoffTime * 2
+            self.reloadAfterError()
+        }
+    }
+    
+    func reloadAfterError() {
+        self.loadNextPage()
+    }
 }
 
 extension GitHubUserListViewModel {
@@ -73,6 +89,7 @@ extension GitHubUserListViewModel {
 
 extension GitHubUserListViewModel {
     func load() {
+        self.gitHubUserVMDelegate?.loadingInitaited()
         if (isLoading || isSearchActive) {
             return
         }
@@ -97,7 +114,7 @@ extension GitHubUserListViewModel {
                     self.gitHubUserList = userVMList
                     self.gitHubUserVMDelegate?.listLoaded()
                 } error: {
-                    
+                    self.notifyAPIError()
                 }
             } else {
                 self.gitHubUserVMDelegate?.showErrorUI(errorText: "No internet connection", imageName: "no_internet_connection")
@@ -106,6 +123,7 @@ extension GitHubUserListViewModel {
     }
     
     func loadNextPage() {
+        self.gitHubUserVMDelegate?.loadingInitaited()
         if (self.isLoading || isSearchActive) {
             return
         }
@@ -125,7 +143,7 @@ extension GitHubUserListViewModel {
             self.gitHubUserList?.append(contentsOf: userVMList)
             self.gitHubUserVMDelegate?.listLoaded()
         } error: {
-            
+            self.notifyAPIError()
         }
     }
 }

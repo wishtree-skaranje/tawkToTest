@@ -2,7 +2,7 @@
 //  ViewExtensions.swift
 //  GitUserHandler
 //
-//  Created by Akshay Patil on 14/03/21.
+//  Created by Supriya Karanje on 14/03/21.
 //
 
 import UIKit

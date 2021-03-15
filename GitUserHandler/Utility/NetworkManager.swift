@@ -2,12 +2,12 @@
 //  NetworkStateManager.swift
 //  GitUserHandler
 //
-//  Created by Akshay Patil on 15/03/21.
+//  Created by Supriya Karanje on 15/03/21.
 //
 
 import Foundation
 
-protocol NetworkStateObserver{
+protocol NetworkStateObserver {
     func networkStateChanged(online: Bool)
 }
 
@@ -44,9 +44,9 @@ class NetworkManager: NSObject {
     }
     
     func removeNetworkStateObserver(networkObserver: NetworkStateObserver) {
-        networkStateObservers.removeAll(where: { (observer) -> Bool in
-            return true
-        })
+        if (networkStateObservers.count <= 2) {
+            networkStateObservers.remove(at: 1)
+        }
     }
     
     func isOnline() -> Bool {

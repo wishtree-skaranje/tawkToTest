@@ -2,7 +2,7 @@
 //  GitUserListTableViewController.swift
 //  GitUserHandler
 //
-//  Created by Akshay Patil on 13/03/21.
+//  Created by Supriya Karanje on 13/03/21.
 //
 
 import UIKit
@@ -12,6 +12,8 @@ class GitHubUserTableViewController: UIViewController, UITableViewDelegate, UITa
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var errorImageView: UIImageView!
+    
+    private var alert: UIAlertController?
     
     private var gitHubListViewModel = GitHubUserListViewModel()
     var resultSearchController = UISearchController()
@@ -121,5 +123,19 @@ extension GitHubUserTableViewController: GitHubUserListViewModelProtocol{
         tableView.isHidden = false
         errorLabel.isHidden = true
         errorImageView.isHidden = true
+    }
+    
+    func showErrorUIPopover(errorText: String) {
+        alert = UIAlertController(title: "", message: errorText, preferredStyle: UIAlertController.Style.alert)
+        alert?.addAction(UIAlertAction(title: "Reload", style: UIAlertAction.Style.default, handler: { (action) in
+            self.gitHubListViewModel.reloadAfterError()
+        }))
+        alert?.addAction(UIAlertAction(title: "Dismiss", style: UIAlertAction.Style.default, handler: nil))
+        self.present(alert!, animated: true, completion: nil)
+    }
+    
+    func loadingInitaited() {
+        hideErrorUI()
+        alert?.dismiss(animated: true, completion: nil)
     }
 }
