@@ -24,13 +24,21 @@ open class GitHubUserTableViewCell<T : GitHubUserViewModel>: UITableViewCell, GH
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()
+    let holderView : UIView = {
+        let holderV = UIView()
+        holderV.translatesAutoresizingMaskIntoConstraints = false
+        holderV.layer.cornerRadius = 25
+        holderV.clipsToBounds = true
+        return holderV
+    }()
     
     private var gitHubUserViewModel : GitHubUserViewModel?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         addSubview(label)
-        addSubview(userImageView)
+        holderView.addSubview(userImageView)
+        addSubview(holderView)
         constraintActivate()
     }
     
@@ -40,16 +48,24 @@ open class GitHubUserTableViewCell<T : GitHubUserViewModel>: UITableViewCell, GH
     
     private func constraintActivate() {
         NSLayoutConstraint.activate([
-            userImageView.leadingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leadingAnchor, constant: 10),
-            userImageView.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 10),
-            userImageView.widthAnchor.constraint(equalToConstant: 50),
-            userImageView.heightAnchor.constraint(equalToConstant: 50),
-//            userImageView.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor, constant: -10),
-//            self.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo:  userImageView.bottomAnchor, constant: 10),
-            label.leadingAnchor.constraint(equalTo: userImageView.trailingAnchor, constant: 10),
-            label.topAnchor.constraint(equalTo: userImageView.topAnchor, constant: 0),
+            holderView.leadingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leadingAnchor, constant: 10),
+            holderView.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 10),
+            holderView.widthAnchor.constraint(equalToConstant: 50),
+            holderView.heightAnchor.constraint(equalToConstant: 50),
+
+            label.leadingAnchor.constraint(equalTo: holderView.trailingAnchor, constant: 10),
+            label.topAnchor.constraint(equalTo: holderView.topAnchor, constant: 0),
             label.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor, constant: -10),
-            label.trailingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.trailingAnchor, constant: -30)
+            label.trailingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.trailingAnchor, constant: -30),
+            
+            
+//            userImageView.leadingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leadingAnchor, constant: 0),
+//                       userImageView.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 0),
+                       userImageView.widthAnchor.constraint(equalToConstant: 50),                    userImageView.heightAnchor.constraint(equalToConstant: 50),
+//            holderView.leadingAnchor.constraint(equalTo: userImageView.trailingAnchor, constant: 0),
+//                       holderView.topAnchor.constraint(equalTo: userImageView.topAnchor, constant: 0),
+//                       holderView.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor, constant: 0),
+//                       holderView.trailingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.trailingAnchor, constant: 0)
         ])
     }
     
