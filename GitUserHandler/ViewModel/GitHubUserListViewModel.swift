@@ -105,7 +105,7 @@ extension GitHubUserListViewModel {
                 self.gitHubUserVMDelegate?.listLoaded()
             } else if (NetworkManager.sharedInstance.isOnline()) {
                 let remoteDataSource = RemoteDataSource()
-                remoteDataSource.getGitHubUsers(0) { (result) in
+                remoteDataSource.getGitHubUsers(0, success:  { (result) in
                     let userVMList = result.enumerated().compactMap { (index, gitHubUser) -> GitHubUserViewModel? in
                         return GitHubUserViewModelFactory.gitHubUserViewModelFactory(index, gitHubUser)
                     }
@@ -113,9 +113,9 @@ extension GitHubUserListViewModel {
                     self.isLoading = false
                     self.gitHubUserList = userVMList
                     self.gitHubUserVMDelegate?.listLoaded()
-                } error: {
+                }, error: {
                     self.notifyAPIError()
-                }
+                })
             } else {
                 self.gitHubUserVMDelegate?.showErrorUI(errorText: "No internet connection", imageName: "no_internet_connection")
             }
@@ -134,7 +134,7 @@ extension GitHubUserListViewModel {
         self.isLoading = true
         self.gitHubUserVMDelegate?.listLoaded()
         let remoteDataSource = RemoteDataSource()
-        remoteDataSource.getGitHubUsers(lastId) { (result) in
+        remoteDataSource.getGitHubUsers(lastId, success: { (result) in
             let userVMList = result.enumerated().compactMap { (index, gitHubUser) -> GitHubUserViewModel? in
                 return GitHubUserViewModelFactory.gitHubUserViewModelFactory(index, gitHubUser)
             }
@@ -142,9 +142,9 @@ extension GitHubUserListViewModel {
             self.isLoading = false
             self.gitHubUserList?.append(contentsOf: userVMList)
             self.gitHubUserVMDelegate?.listLoaded()
-        } error: {
+        }, error: {
             self.notifyAPIError()
-        }
+        })
     }
 }
 
