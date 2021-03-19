@@ -13,10 +13,6 @@ protocol GitHubUserListViewModelProtocol {
     func showErrorUI(errorText: String, imageName: String)
     func hideErrorUI()
     func showErrorUIPopover(errorText: String)
-    
-//    func offlineRedFlag()
-//    func onlineRedFlag()
-//    func showToast(_ msg: String)
 }
 
 class GitHubUserListViewModel{
@@ -105,7 +101,6 @@ extension GitHubUserListViewModel {
         }
         isLoading = true
         let localDataSource = LocalDataSource()
-//        self.gitHubUserVMDelegate?.showToast("api load")
         localDataSource.getGitHubUsers(0) { (users) in
             if (users.count > 0) {
                 let userVMList = users.enumerated().compactMap { (index, gitHubUser) -> GitHubUserViewModel? in
@@ -113,14 +108,12 @@ extension GitHubUserListViewModel {
                 }
                 self.isLoading = false
                 self.gitHubUserList = userVMList
-//                self.gitHubUserVMDelegate?.showToast("loaded from db")
                 self.gitHubUserVMDelegate?.listLoaded()
             } else if (NetworkManager.sharedInstance.isOnline()) {
                 let remoteDataSource = RemoteDataSource()
                 remoteDataSource.getGitHubUsers(0, success:  { (result) in
                     localDataSource.getGitHubUsers(0) { (users) in
                         if (users.count > 0) {
-//                            self.gitHubUserVMDelegate?.showToast("load() api")
                             let userVMList = users.enumerated().compactMap { (index, gitHubUser) -> GitHubUserViewModel? in
                                 return GitHubUserViewModelFactory.gitHubUserViewModelFactory(index, gitHubUser)
                             }
@@ -157,7 +150,6 @@ extension GitHubUserListViewModel {
                     let userVMList = users.enumerated().compactMap { (index, gitHubUser) -> GitHubUserViewModel? in
                         return GitHubUserViewModelFactory.gitHubUserViewModelFactory(index, gitHubUser)
                     }
-//                    self.gitHubUserVMDelegate?.showToast("loadnextpage() api")
                     self.isLoading = false
                     if (self.gitHubUserList == nil) {
                         self.gitHubUserList = userVMList
@@ -177,13 +169,6 @@ extension GitHubUserListViewModel {
 
 extension GitHubUserListViewModel: NetworkStateObserver {
     func networkStateChanged(online: Bool) {
-        
-//        if (online) {
-//            self.gitHubUserVMDelegate?.onlineRedFlag()
-//        } else {
-//            self.gitHubUserVMDelegate?.offlineRedFlag()
-//        }
-        
         if (!isFirstNetworkChangeIgnore) {
             isFirstNetworkChangeIgnore = true
             return
@@ -192,15 +177,11 @@ extension GitHubUserListViewModel: NetworkStateObserver {
         {
             if((gitHubUserList?.count ?? 0) == 0) {
                 self.gitHubUserVMDelegate?.hideErrorUI()
-//                self.gitHubUserVMDelegate?.showToast("online load()")
                 load()
             } else {
                 self.gitHubUserVMDelegate?.hideErrorUI()
-//                self.gitHubUserVMDelegate?.showToast("online nextPage()")
                 loadNextPage()
             }
         }
-        
-
     }
 }

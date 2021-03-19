@@ -29,7 +29,6 @@ class CoreDataStorage: NSObject {
         return persistentContainer.viewContext
     }
     
-//    let backgroundObjectContext : NSManagedObjectContext!
     func backgroundObjectContext() -> NSManagedObjectContext {
         return persistentContainer.newBackgroundContext()
     }
@@ -37,7 +36,6 @@ class CoreDataStorage: NSObject {
     // MARK: - Core Data Saving support
 
     func saveContext () {
-//  //        persistentContainer.performBackgroundTask { (context) in
         let context = persistentContainer.viewContext
         if context.hasChanges {
             do {
@@ -49,40 +47,6 @@ class CoreDataStorage: NSObject {
         }
     }
     func saveContext (context: NSManagedObjectContext) {
-//  //        persistentContainer.performBackgroundTask { (context) in
-//        let context = persistentContainer.viewContext
-//        if context.hasChanges {
-//            do {
-//                try context.save()
-//            } catch {
-//                let nserror = error as NSError
-//                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-//            }
-//        }
-//        persistentContainer.performBackgroundTask() { (context) in
-//            do {
-//                try context.save()
-//            } catch {
-//                fatalError("Failure to save context: \(error)")
-//            }
-//        }
-        
-        
-        
-//        let privateContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
-//        privateContext.persistentStoreCoordinator = persistentContainer.persistentStoreCoordinator
-//        privateContext.perform {
-//            // Code in here is now running "in the background" and can safely
-//            // do anything in privateContext.
-//            // This is where you will create your entities and save them.
-//            do {
-//                try privateContext.save()
-//            } catch {
-//                let nserror = error as NSError
-//                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-//            }
-//        }
-        
         if context.hasChanges {
             do {
                 try context.save()

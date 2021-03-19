@@ -20,15 +20,23 @@ final class Webservice {
         return configuration
     }()
     
+    private let operationQueue : OperationQueue = {
+        let oQueue = OperationQueue()
+        oQueue.maxConcurrentOperationCount = 1
+        return oQueue
+    }()
     
     func load<T>(resource: Resource<T>, completion: @escaping (T?) -> ()) {
-        URLSession(configuration: urlSessionConfiguration).dataTask(with: resource.url) { data, response, error in
+        let dataTask = URLSession(configuration: urlSessionConfiguration, delegate: nil, delegateQueue: operationQueue).dataTask(with: resource.url) { data, response, error in
             if let data = data {
                 completion(resource.parse(data))
             } else {
                 completion(nil)
             }
-        }.resume()
+            CustomQueue.shared.taskExecutionCompleted()
+            //        }.resume()
+        }
+        CustomQueue.shared.addDataTask(dataTask)
     }
     
     func loadImage(urlString: String, userName: String, completionHandler: @escaping (_ urlString: String, _ userName: String ,_ data: Data?) -> ())  {
@@ -45,13 +53,12 @@ final class Webservice {
             print("error reading file \(userName) : \(error)")
         }
         let url = URL(string: urlString)!
-        URLSession(configuration: urlSessionConfiguration).dataTask(with: url) { (data, response, error) in
+        print("\(urlString) loading")
+        let dataTask = URLSession(configuration: urlSessionConfiguration, delegate: nil, delegateQueue: operationQueue).dataTask(with: url) { (data, response, error) in
             guard error == nil else {
                 print(error!)
+                CustomQueue.shared.taskExecutionCompleted()
                 return
-            }
-            if let statusCode = (response as? HTTPURLResponse)?.statusCode {
-                print("Success: \(statusCode)")
             }
             
             do {
@@ -63,6 +70,32 @@ final class Webservice {
                 print("error writing file \(userName) : \(error)")
             }
             completionHandler(urlString, userName, data)
-        }.resume()
+            CustomQueue.shared.taskExecutionCompleted()
+            //        }.resume()
+        }
+        CustomQueue.shared.addDataTask(dataTask)
+    }
+}
+
+class CustomQueue {
+    static let shared = CustomQueue()
+    private var taskQueue = Array<URLSessionDataTask>()
+    private var currentTask : URLSessionDataTask?
+    func addDataTask(_ dataTask: URLSessionDataTask) {
+        taskQueue.append(dataTask)
+        notifyResumeTask()
+    }
+
+    func taskExecutionCompleted() {
+        currentTask = nil
+        notifyResumeTask()
+    }
+
+    func notifyResumeTask() {
+        if (currentTask == nil && taskQueue.count > 0) {
+            currentTask = taskQueue[0]
+            currentTask?.resume()
+            taskQueue.remove(at: 0)
+        }
     }
 }

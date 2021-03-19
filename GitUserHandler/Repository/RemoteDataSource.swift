@@ -15,7 +15,7 @@ class RemoteDataSource {
             return LocalDataSource().createGitHubUserList(data)
         }
         DispatchQueue(label: "userapi.serial.queue").async {
-            Webservice().load(resource: githubUserListResource) { result in
+            Webservice.shared.load(resource: githubUserListResource) { result in
                 if let gitHubUser = result {
                     DispatchQueue.main.async {
                         success(gitHubUser)
@@ -36,7 +36,7 @@ class RemoteDataSource {
             return LocalDataSource().createGitHubUser(data)
         }
         DispatchQueue(label: "userapi.serial.queue").async {
-            Webservice().load(resource: githubUserListResource) { result in
+            Webservice.shared.load(resource: githubUserListResource) { result in
                 if let gitHubUser = result {
                     DispatchQueue.main.async {
                         success(gitHubUser)
@@ -52,7 +52,7 @@ class RemoteDataSource {
     
     func loadImage(urlString: String, userName: String, completionHandler: @escaping (_ urlString: String, _ userName: String ,_ data: Data?) -> ()) {
         DispatchQueue(label: "userapi.serial.queue").sync {
-            Webservice().loadImage(urlString: urlString, userName: userName) { (url, username, data) in
+            Webservice.shared.loadImage(urlString: urlString, userName: userName) { (url, username, data) in
                 DispatchQueue.main.async {
                     completionHandler(url, username ,data)
                 }
