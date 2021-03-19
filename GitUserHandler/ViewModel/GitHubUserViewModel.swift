@@ -69,11 +69,16 @@ open class GitHubUserViewModel {
         } else if (NetworkManager.sharedInstance.isOnline()) {
             let remoteDataSource = RemoteDataSource()
             remoteDataSource.getGitHubUser(self.gitHubUser.login!, success: { (gitHubUser) in
-                self.localDataSource.updateGitHubUser(self.gitHubUser, gitHubUser)
-                self.gitHubUser.is_visited = true
+                let userId = self.gitHubUser.id
+                self.localDataSource.deleteGitHubUser(self.gitHubUser)
                 self.localDataSource.commit()
-                self.isLoading = false
-                self.gitHubUserVMDelegate?.userFound()
+                DispatchQueue.main.async {
+                    self.gitHubUser = self.localDataSource.getGitHubUser(id: String(userId))!
+                    self.gitHubUser.is_visited = true
+                    self.localDataSource.commit()
+                    self.isLoading = false
+                    self.gitHubUserVMDelegate?.userFound()
+                }
             }, error: {
                 self.notifyAPIError()
             })

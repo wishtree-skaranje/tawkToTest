@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreData
 
 class LocalDataSource {
     
@@ -13,9 +14,8 @@ class LocalDataSource {
         CoreDataStorage.shared.saveContext()
     }
     
-    private func getDecoder() -> JSONDecoder{
+    private func getDecoder(_ managedObjectContext: NSManagedObjectContext) -> JSONDecoder{
         let decoder = JSONDecoder()
-        let managedObjectContext = CoreDataStorage.shared.managedObjectContext()
         guard let codingUserInfoKeyManagedObjectContext = CodingUserInfoKey.managedObjectContext else {
             fatalError("Failed to retrieve managed object context Key")
         }
@@ -25,9 +25,12 @@ class LocalDataSource {
     
     func createGitHubUser(_ data: Data) -> GitHubUser?{
         var gitHubUser : GitHubUser?
-        let decoder = getDecoder();
+        let managedObjectContext = CoreDataStorage.shared.backgroundObjectContext()
+        
+        let decoder = getDecoder(managedObjectContext);
         do {
             let result = try decoder.decode(GitHubUser.self, from: data)
+            CoreDataStorage.shared.saveContext(context: managedObjectContext)
             gitHubUser = result
             print(result)
         } catch let error {
@@ -38,9 +41,13 @@ class LocalDataSource {
     
     func createGitHubUserList(_ data: Data) -> Array<GitHubUser>?{
         var gitHubUser : Array<GitHubUser>?
-        let decoder = getDecoder();
+        
+        let managedObjectContext = CoreDataStorage.shared.backgroundObjectContext()
+        
+        let decoder = getDecoder(managedObjectContext);
         do {
             let result = try decoder.decode(Array<GitHubUser>.self, from: data)
+            CoreDataStorage.shared.saveContext(context: managedObjectContext)
             gitHubUser = result
             print(result)
         } catch let error {
@@ -51,6 +58,16 @@ class LocalDataSource {
     
     func getGitHubUsers(_ since: Int, success: @escaping (Array<GitHubUser>) -> Void) {
         CoreDataStorage.shared.fetchGitHubUsers { (users) in
+            if let users = users {
+                success(users)
+            } else {
+                success([])
+            }
+        }
+    }
+    
+    func getGitHubUsersForPagination(_ sinceId: Int, success: @escaping (Array<GitHubUser>) -> Void) {
+        CoreDataStorage.shared.fetchGitHubUsersForPagination("\(sinceId)") { (users) in
             if let users = users {
                 success(users)
             } else {
@@ -79,7 +96,7 @@ class LocalDataSource {
             originalUser.followers = deatiledUser.followers
             originalUser.following = deatiledUser.following
             originalUser.name = deatiledUser.name
-            deleteGitHubUser(deatiledUser)
+            deleteGitHubUser(originalUser)
         }
     }
     

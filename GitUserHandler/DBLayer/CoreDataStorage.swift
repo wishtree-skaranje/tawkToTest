@@ -28,12 +28,61 @@ class CoreDataStorage: NSObject {
     func managedObjectContext() -> NSManagedObjectContext {
         return persistentContainer.viewContext
     }
+    
+//    let backgroundObjectContext : NSManagedObjectContext!
+    func backgroundObjectContext() -> NSManagedObjectContext {
+        return persistentContainer.newBackgroundContext()
+    }
 
     // MARK: - Core Data Saving support
 
     func saveContext () {
-//        persistentContainer.performBackgroundTask { (context) in
+//  //        persistentContainer.performBackgroundTask { (context) in
         let context = persistentContainer.viewContext
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch {
+                let nserror = error as NSError
+                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+            }
+        }
+    }
+    func saveContext (context: NSManagedObjectContext) {
+//  //        persistentContainer.performBackgroundTask { (context) in
+//        let context = persistentContainer.viewContext
+//        if context.hasChanges {
+//            do {
+//                try context.save()
+//            } catch {
+//                let nserror = error as NSError
+//                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+//            }
+//        }
+//        persistentContainer.performBackgroundTask() { (context) in
+//            do {
+//                try context.save()
+//            } catch {
+//                fatalError("Failure to save context: \(error)")
+//            }
+//        }
+        
+        
+        
+//        let privateContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+//        privateContext.persistentStoreCoordinator = persistentContainer.persistentStoreCoordinator
+//        privateContext.perform {
+//            // Code in here is now running "in the background" and can safely
+//            // do anything in privateContext.
+//            // This is where you will create your entities and save them.
+//            do {
+//                try privateContext.save()
+//            } catch {
+//                let nserror = error as NSError
+//                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+//            }
+//        }
+        
         if context.hasChanges {
             do {
                 try context.save()
@@ -56,11 +105,24 @@ class CoreDataStorage: NSObject {
         }
     }
     
+    func fetchGitHubUsersForPagination(_ sinceId : String, _ success: @escaping (Array<GitHubUser>?) -> Void) {
+        let context = persistentContainer.viewContext
+        context.perform {
+            var users : Array<GitHubUser>?
+            let fetchRequest = GitHubUser.fetchRequest()
+            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
+            fetchRequest.returnsObjectsAsFaults = false
+            fetchRequest.predicate = NSPredicate(format: " id > %@ ", sinceId)
+            users = try? (context.fetch(fetchRequest) as! Array<GitHubUser>)
+            success(users)
+        }
+    }
+    
     func fetchGitHubUsers(_ text: String) -> Array<GitHubUser>?{
         let context = persistentContainer.viewContext
         var users : Array<GitHubUser>?
         let fetchRequest = GitHubUser.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: " login CONTAINS[c] %@ ", text)
+        fetchRequest.predicate = NSPredicate(format: " login CONTAINS[c] %@ OR note CONTAINS[c] %@", text, text)
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
 //        fetchRequest.returnsObjectsAsFaults = false
         users = try? (context.fetch(fetchRequest) as! Array<GitHubUser>)
@@ -82,9 +144,15 @@ class CoreDataStorage: NSObject {
     }
     
     func deleteGitHubUser(_ user: GitHubUser) {
-        let context = persistentContainer.viewContext
-        context.perform {
-            context.delete(user)
+        let context = user.managedObjectContext
+        context?.perform {
+            context?.delete(user)
+        }
+        do {
+            try context?.save()
+        } catch {
+            let nserror = error as NSError
+            fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
         }
     }
     

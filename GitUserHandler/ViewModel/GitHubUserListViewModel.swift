@@ -106,13 +106,16 @@ extension GitHubUserListViewModel {
             } else if (NetworkManager.sharedInstance.isOnline()) {
                 let remoteDataSource = RemoteDataSource()
                 remoteDataSource.getGitHubUsers(0, success:  { (result) in
-                    let userVMList = result.enumerated().compactMap { (index, gitHubUser) -> GitHubUserViewModel? in
-                        return GitHubUserViewModelFactory.gitHubUserViewModelFactory(index, gitHubUser)
+                    localDataSource.getGitHubUsers(0) { (users) in
+                        if (users.count > 0) {
+                            let userVMList = users.enumerated().compactMap { (index, gitHubUser) -> GitHubUserViewModel? in
+                                return GitHubUserViewModelFactory.gitHubUserViewModelFactory(index, gitHubUser)
+                            }
+                            self.isLoading = false
+                            self.gitHubUserList = userVMList
+                            self.gitHubUserVMDelegate?.listLoaded()
+                        }
                     }
-                    CoreDataStorage.shared.saveContext()
-                    self.isLoading = false
-                    self.gitHubUserList = userVMList
-                    self.gitHubUserVMDelegate?.listLoaded()
                 }, error: {
                     self.notifyAPIError()
                 })
@@ -135,13 +138,16 @@ extension GitHubUserListViewModel {
         self.gitHubUserVMDelegate?.listLoaded()
         let remoteDataSource = RemoteDataSource()
         remoteDataSource.getGitHubUsers(lastId, success: { (result) in
-            let userVMList = result.enumerated().compactMap { (index, gitHubUser) -> GitHubUserViewModel? in
-                return GitHubUserViewModelFactory.gitHubUserViewModelFactory(index, gitHubUser)
+            LocalDataSource().getGitHubUsersForPagination(lastId) { (users) in
+                if (users.count > 0) {
+                    let userVMList = users.enumerated().compactMap { (index, gitHubUser) -> GitHubUserViewModel? in
+                        return GitHubUserViewModelFactory.gitHubUserViewModelFactory(index, gitHubUser)
+                    }
+                    self.isLoading = false
+                    self.gitHubUserList?.append(contentsOf: userVMList)
+                    self.gitHubUserVMDelegate?.listLoaded()
+                }
             }
-            CoreDataStorage.shared.saveContext()
-            self.isLoading = false
-            self.gitHubUserList?.append(contentsOf: userVMList)
-            self.gitHubUserVMDelegate?.listLoaded()
         }, error: {
             self.notifyAPIError()
         })
