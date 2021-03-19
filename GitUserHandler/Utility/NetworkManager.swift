@@ -63,11 +63,7 @@ class NetworkManager: NSObject {
     }
     
     static func stopNotifier() -> Void {
-        do {
-            try (NetworkManager.sharedInstance.reachability).stopNotifier()
-        } catch {
-            print("Error stopping notifier")
-        }
+        try (NetworkManager.sharedInstance.reachability).stopNotifier()
     }
 
     static func isReachable(completed: @escaping (NetworkManager) -> Void) {

@@ -14,6 +14,7 @@ class GitHubUserTableViewController: UIViewController, UITableViewDelegate, UITa
     @IBOutlet weak var errorImageView: UIImageView!
     
     private var alert: UIAlertController?
+    private var toastmsgs : [String] = []
     
     private var gitHubListViewModel = GitHubUserListViewModel()
     var resultSearchController = UISearchController()
@@ -45,7 +46,7 @@ class GitHubUserTableViewController: UIViewController, UITableViewDelegate, UITa
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(true)
+        super.viewDidAppear(animated)
         gitHubListViewModel.load()
     }
     
@@ -112,7 +113,7 @@ extension GitHubUserTableViewController: GitHubUserListViewModelProtocol{
     }
     
     func showErrorUI(errorText: String, imageName: String) {
-        tableView.isHidden = true
+        self.tableView.isHidden = true
         errorLabel.text = errorText
         errorImageView.image = UIImage(named: imageName)
         errorLabel.isHidden = false
@@ -120,7 +121,7 @@ extension GitHubUserTableViewController: GitHubUserListViewModelProtocol{
     }
     
     func hideErrorUI() {
-        tableView.isHidden = false
+        self.tableView.isHidden = false
         errorLabel.isHidden = true
         errorImageView.isHidden = true
     }
@@ -128,7 +129,7 @@ extension GitHubUserTableViewController: GitHubUserListViewModelProtocol{
     func showErrorUIPopover(errorText: String) {
         alert = UIAlertController(title: "", message: errorText, preferredStyle: UIAlertController.Style.alert)
         alert?.addAction(UIAlertAction(title: "Reload", style: UIAlertAction.Style.default, handler: { (action) in
-            self.gitHubListViewModel.reloadAfterError()
+            self.gitHubListViewModel.manualReloadAfterError()
         }))
         alert?.addAction(UIAlertAction(title: "Dismiss", style: UIAlertAction.Style.default, handler: nil))
         self.present(alert!, animated: true, completion: nil)
@@ -138,4 +139,58 @@ extension GitHubUserTableViewController: GitHubUserListViewModelProtocol{
         hideErrorUI()
         alert?.dismiss(animated: true, completion: nil)
     }
+    
+//    func offlineRedFlag() {
+//        if let view = self.view.viewWithTag(101) {
+//            view.removeFromSuperview()
+//        }
+//        let toastLabel = UILabel(frame: CGRect(x: self.view.frame.size.width/2 - 125, y: self.view.frame.size.height-(self.view.frame.size.height/5), width: 250, height: 35))
+//        toastLabel.backgroundColor = UIColor.red
+//        toastLabel.textAlignment = .center;
+//        toastLabel.textColor = UIColor.white
+//        toastLabel.text = "Offline"
+//        toastLabel.alpha = 1.0
+//        toastLabel.tag = 101
+//        toastLabel.layer.cornerRadius = 10;
+//        toastLabel.clipsToBounds  =  true
+//        self.view.addSubview(toastLabel)
+//    }
+//
+//    func onlineRedFlag() {
+//        if let view = self.view.viewWithTag(101) {
+//            view.removeFromSuperview()
+//        }
+//        let toastLabel = UILabel(frame: CGRect(x: self.view.frame.size.width/2 - 125, y: self.view.frame.size.height-(self.view.frame.size.height/5), width: 250, height: 35))
+//        toastLabel.backgroundColor = UIColor.green
+//        toastLabel.textAlignment = .center;
+//        toastLabel.textColor = UIColor.black
+//        toastLabel.text = "online"
+//        toastLabel.alpha = 1.0
+//        toastLabel.tag = 101
+//        toastLabel.layer.cornerRadius = 10;
+//        toastLabel.clipsToBounds  =  true
+//        self.view.addSubview(toastLabel)
+//    }
+//
+//    func showToast(_ msg: String) {
+//        if let view = self.view.viewWithTag(111) {
+//            (view as! UILabel).text = "\((view as! UILabel).text ?? "") ::: \(msg)"
+//        } else {
+//            let toastLabel = UILabel(frame: CGRect(x:0, y: self.view.frame.size.height-(self.view.frame.size.height/5), width: self.view.frame.size.width, height: 60))
+//            toastLabel.backgroundColor = UIColor.darkGray
+//            toastLabel.textAlignment = .center;
+//            toastLabel.tag = 111
+//            toastLabel.alpha = 1.0
+//            toastLabel.text = msg
+//            toastLabel.layer.cornerRadius = 10;
+//            toastLabel.clipsToBounds  =  true
+//            self.view.addSubview(toastLabel)
+//            UIView.animate(withDuration: 2.0, delay: 5.00, options: .curveEaseOut, animations: {
+//            toastLabel.alpha = 0.0
+//            }, completion: {(isCompleted) in
+//            toastLabel.removeFromSuperview()
+//            })
+//        }
+//    }
+    
 }

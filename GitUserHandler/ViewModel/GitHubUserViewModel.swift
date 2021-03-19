@@ -83,6 +83,7 @@ open class GitHubUserViewModel {
                 self.notifyAPIError()
             })
         } else {
+            self.isLoading = false
             self.gitHubUserVMDelegate?.showNoInternetConenctionUI()
         }
     }

@@ -13,6 +13,10 @@ protocol GitHubUserListViewModelProtocol {
     func showErrorUI(errorText: String, imageName: String)
     func hideErrorUI()
     func showErrorUIPopover(errorText: String)
+    
+//    func offlineRedFlag()
+//    func onlineRedFlag()
+//    func showToast(_ msg: String)
 }
 
 class GitHubUserListViewModel{
@@ -20,6 +24,7 @@ class GitHubUserListViewModel{
     private var gitHubUserVMDelegate: GitHubUserListViewModelProtocol?
     private var searchText : String = ""
     private var exponentialBackoffTime = 5
+    private var isFirstNetworkChangeIgnore = false
     public var isSearchActive: Bool {
         get {
             return !searchText.isEmpty
@@ -63,7 +68,12 @@ class GitHubUserListViewModel{
         }
     }
     
-    func reloadAfterError() {
+    func manualReloadAfterError() {
+        self.exponentialBackoffTime = 5
+        self.loadNextPage()
+    }
+    
+    private func reloadAfterError() {
         self.loadNextPage()
     }
 }
@@ -95,6 +105,7 @@ extension GitHubUserListViewModel {
         }
         isLoading = true
         let localDataSource = LocalDataSource()
+//        self.gitHubUserVMDelegate?.showToast("api load")
         localDataSource.getGitHubUsers(0) { (users) in
             if (users.count > 0) {
                 let userVMList = users.enumerated().compactMap { (index, gitHubUser) -> GitHubUserViewModel? in
@@ -102,12 +113,14 @@ extension GitHubUserListViewModel {
                 }
                 self.isLoading = false
                 self.gitHubUserList = userVMList
+//                self.gitHubUserVMDelegate?.showToast("loaded from db")
                 self.gitHubUserVMDelegate?.listLoaded()
             } else if (NetworkManager.sharedInstance.isOnline()) {
                 let remoteDataSource = RemoteDataSource()
                 remoteDataSource.getGitHubUsers(0, success:  { (result) in
                     localDataSource.getGitHubUsers(0) { (users) in
                         if (users.count > 0) {
+//                            self.gitHubUserVMDelegate?.showToast("load() api")
                             let userVMList = users.enumerated().compactMap { (index, gitHubUser) -> GitHubUserViewModel? in
                                 return GitHubUserViewModelFactory.gitHubUserViewModelFactory(index, gitHubUser)
                             }
@@ -120,6 +133,7 @@ extension GitHubUserListViewModel {
                     self.notifyAPIError()
                 })
             } else {
+                self.isLoading = false
                 self.gitHubUserVMDelegate?.showErrorUI(errorText: "No internet connection", imageName: "no_internet_connection")
             }
         }
@@ -143,22 +157,50 @@ extension GitHubUserListViewModel {
                     let userVMList = users.enumerated().compactMap { (index, gitHubUser) -> GitHubUserViewModel? in
                         return GitHubUserViewModelFactory.gitHubUserViewModelFactory(index, gitHubUser)
                     }
+//                    self.gitHubUserVMDelegate?.showToast("loadnextpage() api")
                     self.isLoading = false
-                    self.gitHubUserList?.append(contentsOf: userVMList)
+                    if (self.gitHubUserList == nil) {
+                        self.gitHubUserList = userVMList
+                    } else {
+                        self.gitHubUserList?.append(contentsOf: userVMList)
+                    }
                     self.gitHubUserVMDelegate?.listLoaded()
                 }
             }
         }, error: {
-            self.notifyAPIError()
+            DispatchQueue.main.async {
+                self.notifyAPIError()
+            }
         })
     }
 }
 
 extension GitHubUserListViewModel: NetworkStateObserver {
     func networkStateChanged(online: Bool) {
-        if (online && (gitHubUserList?.count ?? 0) == 0) {
-            self.gitHubUserVMDelegate?.hideErrorUI()
-            load()
+        
+//        if (online) {
+//            self.gitHubUserVMDelegate?.onlineRedFlag()
+//        } else {
+//            self.gitHubUserVMDelegate?.offlineRedFlag()
+//        }
+        
+        if (!isFirstNetworkChangeIgnore) {
+            isFirstNetworkChangeIgnore = true
+            return
         }
+        if (online)
+        {
+            if((gitHubUserList?.count ?? 0) == 0) {
+                self.gitHubUserVMDelegate?.hideErrorUI()
+//                self.gitHubUserVMDelegate?.showToast("online load()")
+                load()
+            } else {
+                self.gitHubUserVMDelegate?.hideErrorUI()
+//                self.gitHubUserVMDelegate?.showToast("online nextPage()")
+                loadNextPage()
+            }
+        }
+        
+
     }
 }
